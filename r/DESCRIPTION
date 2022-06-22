@@ -14,5 +14,9 @@ RoxygenNote: 7.2.0
 Imports: 
     htmlwidgets,
     jsonlite,
+    magrittr,
+    purrr,
     rmarkdown,
     rsconnect
+Depends: 
+    R (>= 2.10)
