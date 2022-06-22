@@ -19,9 +19,18 @@ parse_value <- function(value){
   }
 }
 
-parse_txt_js <- function(file) {
+read_txt_js_header <- function(file) {
+
   lines <- readLines(file,  warn = FALSE)
+
   last_line <- which(lines == "**/")
+
+  if(length(last_line) == 0){
+    # no **/
+
+    return(list())
+  }
+
   lines <- lines[2:(last_line - 1)]
   yaml <- lines |>
     paste(collapse = "\n")
@@ -29,7 +38,18 @@ parse_txt_js <- function(file) {
 }
 
 build_param_list <- function(x){
-  x$params$params |>
+
+  if(length(x) == 0){
+    return(list(error = ""))
+  }
+
+  param_list <- x |>
+    magrittr::extract2("params")
+
+  param_names <- param_list |>
+    purrr::map_chr(purrr::pluck, "name")
+
+  x$params |>
     purrr::imap(~list(
       id = .y-1,
       static = FALSE,
@@ -39,6 +59,12 @@ build_param_list <- function(x){
       single = .x$single
     )) |>
     purrr::set_names(
-      x$params$params |> purrr::map_chr(purrr::pluck, "name")
+      param_names
     )
+}
+
+parse_txt_js <- function(file){
+  file |>
+    read_txt_js_header() |>
+    build_param_list()
 }
