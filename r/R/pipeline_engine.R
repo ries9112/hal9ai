@@ -44,12 +44,23 @@ build_param_list <- function(x){
   }
 
   param_list <- x |>
-    magrittr::extract2("params")
+    magrittr::extract2("params") |>
+    purrr::map(function(x){
+      if(is.null(names(x))){
+        list(
+          name = x,
+          label = x,
+          value = NULL
+        )
+      } else {
+        return(x)
+      }
+    })
 
   param_names <- param_list |>
-    purrr::map_chr(purrr::pluck, "name")
+    purrr::map_chr(magrittr::extract2, "name")
 
-  x$params |>
+  param_list |>
     purrr::imap(~list(
       id = .y-1,
       static = FALSE,
