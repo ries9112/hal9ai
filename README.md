@@ -1,64 +1,82 @@
 
-# Hal9
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
-[<img src="https://img.shields.io/discord/939331860092301312">](https://discord.gg/jP8W48EVa3) [![](https://data.jsdelivr.com/v1/package/npm/hal9/badge)](https://www.jsdelivr.com/package/npm/hal9)
+# hal9 <img src="man/figures/logo.png" align="right" width="120" />
 
-Hal9 provides a platform to develop Artificial Intelligence solutions with web technologies. This repo contains the open source components that power [hal9.ai](https://hal9.ai) which consist of:
+<!-- badges: start -->
+<!-- badges: end -->
 
-- A `hal9.js` library which allows you to compose pipelines using less code.
-- A library of steps to compose pipelines under the `/scripts` path.
+The goal of hal9 is to provide R users a high-level hal9.js API.
 
-## Getting Started
+## Installation
 
-Here is a quick example that showcases a data pipeline to read a CSV and plot a line chart. Notice that each pipeline step contains a reference to the source to execute and the parameters associated to each step.
+You can install the development version of hal9 from
+[GitHub](https://github.com/) with:
 
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    <script src="https://cdn.jsdelivr.net/npm/hal9@latest/dist/hal9.js"></script> 
-  </head>
-  <body>
-    <div id="output" style="margin: auto; width: 800px; height: 400px;"></div>
-    <script>
-      hal9.run([
-        hal9.step('import/csv.txt.js', { file: 'https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv' }),
-        hal9.step('charts/linechart.txt.js', { x: 'Date', y: [ 'AAPL.Open', 'AAPL.High' ] }, 'output')
-      ]);
-    </script>
-  </body>
-</html>
+``` r
+# install.packages("devtools")
+devtools::install_github("hal9ai/hal9ai")
 ```
 
-![](docs/examples/csvplot.png)
+## Basic Usage
 
-Please [join **Hal9's Discord** server](https://discord.gg/jP8W48EVa3) to help you get started.
+Hal9 is a javascript library that enables anyone to compose
+visualizations and predictive models optimized for websites and web
+APIs.
 
-Feel free to use our development environment [devel.hal9.ai](https://devel.hal9.ai); however, this environment produces daily builds and is not recommended for production use..
+You can explore your data interactively using the `hal9` function:
 
-## Concepts
+``` r
+library(hal9)
+## basic example code
 
-This repo contains everything related to the hal9 project, an application and service to make Artificial Intelligence more accessible.
+hal9(my_data)
+```
 
-The concepts behind this project are the following:
-- **Pipeline:** A pipeline is a set of arbitrary operations executed sequentially.
-- **Step:** A step is just a step to be executed in the pipeline.
-- **Script:** A script is the code behind a pipeline's step. It's currently written in JavaScript but this could be extended in the future.
-- **Header:** Each script has a YAML header that describes the script. It contains the input, output, parameters, environment, caching strategy, etc. that the script requires.
-- **Parameters:** The parameters describes what values are passed to each script, think of them as function parameters to each script.
+You may also build a specific pipeline using our high-level functions:
 
-As you can see, there is nothing particular to Artificial Intelligence in those concepts. However, the pipelines step are specialized for AI applications that loosely follow these data processing stages:
-- **Import:** Data is imported from a given location.
-- **Transform:** Data is cleaned and transformed into a usable state.
-- **Visualize:** Data is then rendered to find insights using a library of multiple scripts that support many charts.
-- **Train:** Data is then used to create a predictive model.
-- **Predict:** Data is then used for prediction or classification.
-- **Explain:** The prediction can then be explained to gain further insights.
-- **Export:** Elements of this workflow are then exported to 3rd parties.
+``` r
+mtcars |> 
+  hal9() |> 
+  hal9_add_filter()
 
-Notice that most stages are optional, some users might want to just "Import and Visualize" data, or "Import and Predict using pre-trained models"; while others might want to make use of every step. In addition, the platform does not really know, nor care, that the scripts being run create an AI workflow.
+#option 2
 
-This code repository is structured as follows:
-- **API:** The [api](api/) path builds the public JavaScript API for developers to run pipelines.
-- **Core:** The [core](core) path contains code to actually run the pipelines.
-- **Scripts:** The [scripts](scripts/) path contains the pipelines steps used to compose data pipelines.
+# pre-built common pipelines
+hal9_filter(mtcars)
+```
+
+## Exporting a pipeline
+
+You may export an existing pipeline built using high level functions to
+a html file using the `hal9_render` function:
+
+``` r
+mtcars |> 
+  hal9() |> 
+  hal9_to_html(file = "myHal9.html")
+```
+
+## Publishing a pipeline
+
+You can also publish your work on RPubs and make it easily shareable
+through a link:
+
+``` r
+mtcars |> 
+  hal9() |> 
+  hal9_publish(file = "myHal9.html")
+```
+
+## TO DO
+
+-   [ ] Test infrastructure
+-   [x] `hal9_render()` first draft
+-   [ ] `hal9_render()` tests
+-   [x] `hal9_publish()` first draft
+
+#### Maybe
+
+-   [ ] Shiny use case
+-   [ ] Stats/ML use case
+-   [ ] Publishing hal9 vignette (rpubs, shinyapps, stand alone html)
