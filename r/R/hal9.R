@@ -93,6 +93,7 @@ hal9_filter <- function(data, width = NULL, height = NULL, elementId = NULL) {
   )
 }
 
+#' @export
 hal9_add_step <- function(h, pipeline_name) {
 
   novo_id <- lapply(h$x$pipeline$steps, function(x) x$id) |>
@@ -101,17 +102,91 @@ hal9_add_step <- function(h, pipeline_name) {
 
   novo_id <- novo_id + 1
 
-  components <- readRDS(system.file("extdata/components.rds", package = "hal9"))
-  comp <- components[[components]]
+  #components <- readRDS(system.file("extdata/components.rds", package = "hal9"))
+  comp <- components[components$name == pipeline_name,]
 
   h$x$pipeline$steps <- c(
     h$x$pipeline$steps,
     list(
       list(
-        name = name,
-        label = label,
+        name = comp$name,
+        label = comp$label,
+        language = comp$language,
+        description = comp$description,
+        icon = comp$icon,
+        id = novo_id,
+        params = NULL
+      )
+    )
+  )
+
+  l_params <- list(
+    a = comp$component_params[[1]]
+  )
+  names(l_params) <- novo_id
+
+  h$x$pipeline$params <- c(
+    h$x$pipeline$params,
+    l_params
+  )
+
+  script <- ""
+
+  l_script <- list(
+    a = script
+  )
+
+  names(l_script) <- novo_id
+
+  h$x$pipeline$script <- c(
+    h$x$pipeline$script,
+    l_script
+  )
+
+  h$x$pipeline_json <- jsonlite::toJSON(
+    h$x$pipeline,
+    null = "list",
+    auto_unbox = TRUE
+  )
+
+  h
+
+}
+
+hal9_filter <- function(data, width = NULL, height = NULL, elementId = NULL) {
+  # forward options using x
+  x = list(
+    data = jsonlite::toJSON(data)
+  )
+
+  # create widget
+  htmlwidgets::createWidget(
+    name = 'hal9-filter',
+    x,
+    width = width,
+    height = height,
+    package = 'hal9',
+    elementId = elementId,
+    sizingPolicy = htmlwidgets::sizingPolicy(padding = 0)
+  )
+}
+
+hal9_add_filter <- function(h) {
+
+  novo_id <- lapply(h$x$pipeline$steps, function(x) x$id) |>
+    as.numeric() |>
+    max()
+
+  novo_id <- novo_id + 1
+
+  h$x$pipeline$steps <- c(
+    h$x$pipeline$steps,
+    list(
+      list(
+        name = "filter",
+        label = "Filter",
         language = "javascript",
-        description = desc,
+        description = "Keep only the rows that satisfy a given expression for a specific column",
         icon = "fa-light fa-filter",
         id = novo_id,
         params = NULL
@@ -121,7 +196,33 @@ hal9_add_step <- function(h, pipeline_name) {
 
   l_params <- list(
     a = list(
-      pipeline_data[pipeline_name]
+      field = list(
+        id = 0,
+        static = FALSE,
+        value = list(
+          list(
+            id = 0,
+            name = "",
+            label = ""
+          )
+        ),
+        name = "field",
+        label = "Field",
+        single = TRUE
+      ),
+      expression = list(
+        id = 1,
+        static = TRUE,
+        value = list(
+          list(
+            id = 1,
+            control = "textbox",
+            value = "field != null"
+          )
+        ),
+        name = "expression",
+        label = "Expression"
+      )
     )
   )
   names(l_params) <- novo_id
